@@ -1,11 +1,10 @@
+const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const fs = require('fs');
+const app = express();
 
 const STUDENT_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=1';
 const PROFESSOR_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=2';
-const STUDENT_MENU_FILE = 'student_menu.json';
-const PROFESSOR_MENU_FILE = 'professor_menu.json';
 
 async function getMenu(url) {
     try {
@@ -42,30 +41,29 @@ async function getMenu(url) {
     }
 }
 
-async function saveMenuToFile(url, fileName) {
+app.get('/api/student-menu', async (req, res) => {
     try {
-        const menu = await getMenu(url);
-        fs.writeFileSync(fileName, JSON.stringify(menu, null, 2), 'utf-8');
+        const menu = await getMenu(STUDENT_DINING_URL);
+        res.json(menu);
     } catch (error) {
-        console.error(`Error saving menu to ${fileName}:`, error);
-        throw new Error(`Failed to save menu data to ${fileName}`);
+        console.error('Error fetching student menu:', error);
+        res.status(500).json({ error: 'Failed to retrieve student menu' });
     }
-}
+});
 
-async function initialFetchAndSave() {
+app.get('/api/professor-menu', async (req, res) => {
     try {
-        await saveMenuToFile(STUDENT_DINING_URL, STUDENT_MENU_FILE);
-        await saveMenuToFile(PROFESSOR_DINING_URL, PROFESSOR_MENU_FILE);
+        const menu = await getMenu(PROFESSOR_DINING_URL);
+        res.json(menu);
     } catch (error) {
-        console.error('Error in initial fetch and save:', error);
-        process.exit(1);
+        console.error('Error fetching professor menu:', error);
+        res.status(500).json({ error: 'Failed to retrieve professor menu' });
     }
-}
+});
 
-module.exports = {
-    getMenu,
-    saveMenuToFile,
-    initialFetchAndSave,
-    STUDENT_MENU_FILE,
-    PROFESSOR_MENU_FILE
-};
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;

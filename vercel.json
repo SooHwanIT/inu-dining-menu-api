@@ -1,10 +1,19 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" }
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/api/student-menu", "dest": "/api/student-menu.js" },
-    { "src": "/api/professor-menu", "dest": "/api/professor-menu.js" }
+    {
+      "src": "/api/student-menu",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/professor-menu",
+      "dest": "/server.js"
+    }
   ]
 }
