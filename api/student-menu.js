@@ -40,7 +40,9 @@ async function getMenu(url) {
 
 export default async (req, res) => {
     try {
+        console.log('Fetching student menu...');
         const menu = await getMenu(STUDENT_DINING_URL);
+        console.log('Menu fetched:', menu);
         res.status(200).json(menu);
     } catch (error) {
         console.error('Error fetching student menu:', error);
