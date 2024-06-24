@@ -1,9 +1,6 @@
-const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const cron = require('node-cron');
 const fs = require('fs');
-const app = express();
 
 const STUDENT_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=1';
 const PROFESSOR_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=2';
@@ -19,13 +16,10 @@ async function getMenu(url) {
 
         $('#menuBox tbody tr').each((i, row) => {
             if (i === 0) {
-                // Skip header row
                 return;
             }
 
             const mealTime = $(row).find('td.corn_nm').text().trim();
-
-            // Only keep specific meal times
             const validMealTimes = ["중식(백반)", "중식(일품)", "중식", "석식"];
             if (!validMealTimes.includes(mealTime)) {
                 return;
@@ -58,48 +52,20 @@ async function saveMenuToFile(url, fileName) {
     }
 }
 
-// Schedule the task to run at midnight every day
-cron.schedule('0 0 * * *', () => {
-    console.log('Running the cron job to update menus');
-    saveMenuToFile(STUDENT_DINING_URL, STUDENT_MENU_FILE)
-        .catch(err => console.error('Error in cron job for student menu update:', err));
-    saveMenuToFile(PROFESSOR_DINING_URL, PROFESSOR_MENU_FILE)
-        .catch(err => console.error('Error in cron job for professor menu update:', err));
-});
-
-// Initial fetch to ensure data is available on first run
 async function initialFetchAndSave() {
     try {
         await saveMenuToFile(STUDENT_DINING_URL, STUDENT_MENU_FILE);
         await saveMenuToFile(PROFESSOR_DINING_URL, PROFESSOR_MENU_FILE);
     } catch (error) {
         console.error('Error in initial fetch and save:', error);
-        process.exit(1); // Exit the process in case of critical failure
+        process.exit(1);
     }
 }
-initialFetchAndSave();
 
-app.get('/api/student-menu', async (req, res) => {
-    try {
-        const menu = JSON.parse(fs.readFileSync(STUDENT_MENU_FILE, 'utf-8'));
-        res.json(menu);
-    } catch (error) {
-        console.error('Error reading student menu file:', error);
-        res.status(500).json({ error: 'Failed to retrieve student menu' });
-    }
-});
-
-app.get('/api/professor-menu', async (req, res) => {
-    try {
-        const menu = JSON.parse(fs.readFileSync(PROFESSOR_MENU_FILE, 'utf-8'));
-        res.json(menu);
-    } catch (error) {
-        console.error('Error reading professor menu file:', error);
-        res.status(500).json({ error: 'Failed to retrieve professor menu' });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+module.exports = {
+    getMenu,
+    saveMenuToFile,
+    initialFetchAndSave,
+    STUDENT_MENU_FILE,
+    PROFESSOR_MENU_FILE
+};
