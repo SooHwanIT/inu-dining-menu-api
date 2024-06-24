@@ -1,3 +1,20 @@
+// const express = require('express');
+// const app = express();
+//
+// app.get('/api/menu', (req, res) => {
+//     // 메뉴 출력 로직
+//     res.send('메뉴를 출력합니다.');
+// });
+//
+// app.get('/api', (req, res) => {
+//     // 헬로 월드 출력 로직
+//     res.send('Hello, World!');
+// });
+//
+// module.exports = app;
+
+
+
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -40,6 +57,12 @@ async function getMenu(url) {
         throw new Error('Failed to fetch menu data');
     }
 }
+
+app.get('/api', (req, res) => {
+    res.send('Hello, World!');
+});
+
+
 
 app.get('/api/student-menu', async (req, res) => {
     try {
