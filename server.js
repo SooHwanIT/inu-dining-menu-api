@@ -1,20 +1,3 @@
-// const express = require('express');
-// const app = express();
-//
-// app.get('/api/menu', (req, res) => {
-//     // 메뉴 출력 로직
-//     res.send('메뉴를 출력합니다.');
-// });
-//
-// app.get('/api', (req, res) => {
-//     // 헬로 월드 출력 로직
-//     res.send('Hello, World!');
-// });
-//
-// module.exports = app;
-
-
-
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -23,9 +6,15 @@ const app = express();
 const STUDENT_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=1';
 const PROFESSOR_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=2';
 
+const axiosConfig = {
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    }
+};
+
 async function getMenu(url) {
     try {
-        const { data } = await axios.get(url);
+        const { data } = await axios.get(url, axiosConfig);
         const $ = cheerio.load(data);
 
         let menu = [];
@@ -58,12 +47,12 @@ async function getMenu(url) {
     }
 }
 
-app.get('/api', (req, res) => {
+// Hello, World 출력
+app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-
-
+// 학생 식단 메뉴 API
 app.get('/api/student-menu', async (req, res) => {
     try {
         const menu = await getMenu(STUDENT_DINING_URL);
@@ -74,6 +63,7 @@ app.get('/api/student-menu', async (req, res) => {
     }
 });
 
+// 교수 식단 메뉴 API
 app.get('/api/professor-menu', async (req, res) => {
     try {
         const menu = await getMenu(PROFESSOR_DINING_URL);
