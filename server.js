@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 const app = express();
 
 const STUDENT_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=1';
@@ -14,8 +15,11 @@ const axiosConfig = {
 
 async function getMenu(url) {
     try {
+        console.log(`Fetching menu from: ${url}`);
         const { data } = await axios.get(url, axiosConfig);
+        console.log('Data fetched successfully');
         const $ = cheerio.load(data);
+        console.log('HTML loaded into cheerio');
 
         let menu = [];
 
@@ -40,6 +44,7 @@ async function getMenu(url) {
             });
         });
 
+        console.log('Menu parsed successfully');
         return menu;
     } catch (error) {
         console.error('Error fetching menu:', error);
