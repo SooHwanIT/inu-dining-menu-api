@@ -7,16 +7,16 @@ const STUDENT_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=1';
 const PROFESSOR_DINING_URL = 'https://inucoop.com/main.php?mkey=2&w=2&l=2';
 
 const axiosConfig = {
-    headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    },
-    timeout: 20000 // 20 seconds
+    timeout: 60000 // 60 seconds
 };
 
 async function getMenu(url) {
     try {
+        console.log(`Fetching menu from: ${url}`);
         const { data } = await axios.get(url, axiosConfig);
+        console.log('Data fetched successfully:', data.substring(0, 100)); // 데이터의 첫 100자를 출력
         const $ = cheerio.load(data);
+        console.log('HTML loaded into cheerio');
 
         let menu = [];
 
@@ -26,6 +26,7 @@ async function getMenu(url) {
             }
 
             const mealTime = $(row).find('td.corn_nm').text().trim();
+            console.log(`Found mealTime: ${mealTime}`);
             const validMealTimes = ["중식(백반)", "중식(일품)", "중식", "석식"];
             if (!validMealTimes.includes(mealTime)) {
                 return;
@@ -35,12 +36,14 @@ async function getMenu(url) {
                 if (j === (new Date().getDay() - 1)) {
                     const dishes = $(cell).html().split('<br>').map(d => d.trim()).filter(d => d && d !== "--------------");
                     if (dishes.length > 0) {
+                        console.log(`Found dishes: ${dishes}`);
                         menu.push({ mealTime, dishes });
                     }
                 }
             });
         });
 
+        console.log('Menu parsed successfully:', menu);
         return menu;
     } catch (error) {
         console.error('Error fetching menu:', error);
